@@ -1,0 +1,17 @@
+version: "3.3"
+services:
+  postgres:
+    image: postgres:16
+    container_name: garimpei_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: garimpeidb
+    ports:
+      - "6000:5432"
+#    volumes:
+#      - pgdata:/var/lib/postgresql/data
+
+#volumes:
+#  pgdata:
