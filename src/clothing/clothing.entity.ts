@@ -19,14 +19,14 @@ export class Clothing {
   @Column()
   description: string;
 
-  @Column()
-  initial_bid: string;
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  initial_bid: number;
 
-  @Column()
-  initial_date: string;
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  initial_date: Date;
 
-  @Column()
-  end_date: string;
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  end_date: Date;
 
   @ManyToOne(() => Store, (store) => store.clothings, { onDelete: 'CASCADE' })
   store: Store;

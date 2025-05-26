@@ -1,5 +1,12 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsOptional, IsString, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsDate,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { CreateBidDto } from 'src/bid/dto/create-bid.dto';
 import { CreateStoreDto } from 'src/store/dto/create-store.dto';
 
@@ -10,14 +17,14 @@ export class CreateClothingDto {
   @IsString()
   description: string;
 
-  @IsString()
-  initial_bid: string;
+  @IsNumber()
+  initial_bid: number;
 
-  @IsString()
-  initial_date: string;
+  @IsDate()
+  initial_date: Date;
 
-  @IsString()
-  end_date: string;
+  @IsDate()
+  end_date: Date;
 
   @ValidateNested({ each: true })
   @Type(() => CreateStoreDto)

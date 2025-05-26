@@ -30,6 +30,11 @@ export class ClothingController {
     return this.clothingService.findOne(+id);
   }
 
+  @Get(':id/time-remaining')
+  getTimeRemaining(@Param('id') id: string) {
+    return this.clothingService.getTimeRemaining(+id);
+  }
+
   @Put(':id')
   update(@Param('id') id: string, @Body() dto: UpdateClothingDto) {
     return this.clothingService.update(+id, dto);

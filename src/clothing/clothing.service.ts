@@ -34,6 +34,22 @@ export class ClothingService {
     return clothing;
   }
 
+  async getTimeRemaining(id: number) {
+    const clothing = await this.clothingRepository.findOne({ where: { id } });
+    if (!clothing) {
+      throw new Error('Clothing not found');
+    }
+
+    const now = new Date();
+    const timeRemaining = clothing.end_date.getTime() - now.getTime();
+
+    return {
+      isActive: now >= clothing.initial_date && now <= clothing.end_date,
+      timeRemaining: timeRemaining > 0 ? timeRemaining : 0,
+      end_date: clothing.end_date,
+    };
+  }
+
   async update(id: number, dto: UpdateClothingDto): Promise<Clothing> {
     await this.clothingRepository.update(id, dto);
     return this.findOne(id);
