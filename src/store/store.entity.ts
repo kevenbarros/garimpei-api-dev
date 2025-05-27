@@ -16,8 +16,17 @@ export class Store {
   @Column()
   name: string;
 
-  @Column()
-  location: string;
+  @Column({ default: '' })
+  description: string;
+
+  @Column({ default: '' })
+  contact: string;
+
+  @Column({ default: '' })
+  instagram: string;
+
+  @Column({ default: '' })
+  address: string;
 
   @ManyToOne(() => Seller, (seller) => seller.stores, { onDelete: 'CASCADE' })
   seller: Seller;

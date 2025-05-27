@@ -8,7 +8,16 @@ export class CreateStoreDto {
   name: string;
 
   @IsString()
-  location: string;
+  description: string;
+
+  @IsString()
+  contact: string;
+
+  @IsString()
+  instagram: string;
+
+  @IsString()
+  address: string;
 
   @ValidateNested({ each: true })
   @Type(() => CreateSellerDto)
