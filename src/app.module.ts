@@ -12,6 +12,8 @@ import { SellerModule } from './seller/seller.module';
 import { StoreModule } from './store/store.module';
 import { BidModule } from './bid/bid.module';
 import { ClothingModule } from './clothing/clothing.module';
+import { Image } from './image/image.entity';
+import { ImageModule } from './image/image.module';
 
 @Module({
   imports: [
@@ -22,7 +24,7 @@ import { ClothingModule } from './clothing/clothing.module';
       username: 'postgres',
       password: 'root',
       database: 'garimpeidb',
-      entities: [Buyer, Seller, Clothing, Bid, Store],
+      entities: [Buyer, Seller, Clothing, Bid, Store, Image],
       synchronize: true, // true só para desenvolvimento!
     }),
     BuyerModule,
@@ -30,6 +32,7 @@ import { ClothingModule } from './clothing/clothing.module';
     StoreModule,
     BidModule,
     ClothingModule,
+    ImageModule,
   ],
   controllers: [AppController],
   providers: [AppService],
