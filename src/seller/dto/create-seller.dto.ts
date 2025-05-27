@@ -7,10 +7,19 @@ export class CreateSellerDto {
   name: string;
 
   @IsString()
+  password: string;
+
+  @IsString()
   contact: string;
 
   @IsString()
   instagram: string;
+
+  @IsString()
+  cpf: string;
+
+  @IsString()
+  email: string;
 
   @IsOptional()
   @IsArray()

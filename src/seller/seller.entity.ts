@@ -9,11 +9,20 @@ export class Seller {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ default: '' })
+  password: string;
+
+  @Column({ default: '' })
   contact: string;
 
-  @Column()
+  @Column({ default: '' })
   instagram: string;
+
+  @Column({ default: '' })
+  cpf: string;
+
+  @Column({ default: '' })
+  email: string;
 
   @OneToMany(() => Store, (store) => store.seller, { cascade: true })
   stores: Store[];
