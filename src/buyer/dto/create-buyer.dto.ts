@@ -1,22 +1,25 @@
 import { Type } from 'class-transformer';
-import {
-  IsArray,
-  IsInt,
-  IsOptional,
-  IsString,
-  ValidateNested,
-} from 'class-validator';
+import { IsArray, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { CreateBidDto } from 'src/bid/dto/create-bid.dto';
 
 export class CreateBuyerDto {
   @IsString()
   name: string;
 
-  @IsInt()
+  @IsString()
+  password: string;
+
+  @IsString()
   contact: string;
 
-  @IsInt()
+  @IsString()
   instagram: string;
+
+  @IsString()
+  cpf: string;
+
+  @IsString()
+  email: string;
 
   @IsOptional()
   @IsArray()

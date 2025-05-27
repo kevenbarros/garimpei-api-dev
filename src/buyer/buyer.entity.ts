@@ -9,11 +9,20 @@ export class Buyer {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ default: '' })
+  password: string;
+
+  @Column({ default: '' })
   contact: string;
 
-  @Column()
+  @Column({ default: '' })
   instagram: string;
+
+  @Column({ default: '' })
+  cpf: string;
+
+  @Column({ default: '' })
+  email: string;
 
   @OneToMany(() => Bid, (bid) => bid.buyer)
   bids: Bid[];
