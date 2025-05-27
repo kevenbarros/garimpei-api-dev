@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { Store } from 'src/store/store.entity';
 import { Bid } from 'src/bid/bid.entity';
+import { Image } from 'src/image/image.entity';
 
 @Entity()
 export class Clothing {
@@ -28,9 +29,15 @@ export class Clothing {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   end_date: Date;
 
+  @Column({ default: '' })
+  size: string;
+
   @ManyToOne(() => Store, (store) => store.clothings, { onDelete: 'CASCADE' })
   store: Store;
 
   @OneToMany(() => Bid, (bid) => bid.clothing, { cascade: true })
   bids: Bid[];
+
+  @OneToMany(() => Image, (image) => image.clothing, { cascade: true })
+  images: Image[];
 }

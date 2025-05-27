@@ -8,6 +8,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { CreateBidDto } from 'src/bid/dto/create-bid.dto';
+import { CreateImageDto } from 'src/image/dto/create-image.dto';
 import { CreateStoreDto } from 'src/store/dto/create-store.dto';
 
 export class CreateClothingDto {
@@ -26,6 +27,9 @@ export class CreateClothingDto {
   @IsDate()
   end_date: Date;
 
+  @IsString()
+  size: string;
+
   @ValidateNested({ each: true })
   @Type(() => CreateStoreDto)
   store: CreateStoreDto;
@@ -35,4 +39,10 @@ export class CreateClothingDto {
   @ValidateNested({ each: true })
   @Type(() => CreateBidDto)
   bids?: CreateBidDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateImageDto)
+  images?: CreateImageDto[];
 }

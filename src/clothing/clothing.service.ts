@@ -19,14 +19,14 @@ export class ClothingService {
 
   findAll(): Promise<Clothing[]> {
     return this.clothingRepository.find({
-      relations: ['store', 'bids', 'bids.buyer'],
+      relations: ['store', 'bids', 'bids.buyer', 'images'],
     });
   }
 
   async findOne(id: number): Promise<Clothing> {
     const clothing = await this.clothingRepository.findOne({
       where: { id },
-      relations: ['store', 'bids', 'bids.buyer'],
+      relations: ['store', 'bids', 'bids.buyer', 'images'],
     });
     if (!clothing) {
       throw new Error(`Clothing with id ${id} not found`);
