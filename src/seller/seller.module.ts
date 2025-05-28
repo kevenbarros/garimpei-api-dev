@@ -4,9 +4,10 @@ import { SellerService } from './seller.service';
 import { SellerController } from './seller.controller';
 import { Seller } from './seller.entity';
 import { Store } from '../store/store.entity';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Seller, Store])],
+  imports: [TypeOrmModule.forFeature([Seller, Store]), AuthModule],
   controllers: [SellerController],
   providers: [SellerService],
 })

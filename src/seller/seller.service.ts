@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Seller } from './seller.entity';
 import { CreateSellerDto } from './dto/create-seller.dto';
 import { UpdateSellerDto } from './dto/update-seller.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class SellerService {
@@ -12,8 +13,12 @@ export class SellerService {
     private sellerRepository: Repository<Seller>,
   ) {}
 
-  create(createSellerDto: CreateSellerDto): Promise<Seller> {
-    const seller = this.sellerRepository.create(createSellerDto);
+  async create(createSellerDto: CreateSellerDto): Promise<Seller> {
+    const hash = await bcrypt.hash(createSellerDto.password, 10);
+    const seller = this.sellerRepository.create({
+      ...createSellerDto,
+      password: hash,
+    });
     return this.sellerRepository.save(seller);
   }
 
@@ -39,5 +44,10 @@ export class SellerService {
 
   async remove(id: number): Promise<void> {
     await this.sellerRepository.delete(id);
+  }
+
+  async findByEmail(email: string): Promise<Seller | undefined> {
+    const seller = await this.sellerRepository.findOne({ where: { email } });
+    return seller === null ? undefined : seller;
   }
 }
