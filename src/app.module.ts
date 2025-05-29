@@ -14,6 +14,7 @@ import { BidModule } from './bid/bid.module';
 import { ClothingModule } from './clothing/clothing.module';
 import { Image } from './image/image.entity';
 import { ImageModule } from './image/image.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ImageModule } from './image/image.module';
     BidModule,
     ClothingModule,
     ImageModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
