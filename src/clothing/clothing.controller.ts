@@ -9,11 +9,12 @@ import {
   UseInterceptors,
   UploadedFile,
   UseGuards,
+  UploadedFiles,
 } from '@nestjs/common';
 import { ClothingService } from './clothing.service';
 import { CreateClothingDto } from './dto/create-clothing.dto';
 import { UpdateClothingDto } from './dto/update-clothing.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { BlobService } from 'src/blob/blob.service';
 import { Image } from '../image/image.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -102,6 +103,29 @@ export class ClothingController {
     return {
       ...clothing,
       images: [{ url: imageUrl }],
+    };
+  }
+
+  @Post('create-with-images')
+  @UseInterceptors(FilesInterceptor('images', 10)) // até 10 imagens
+  async createWithImages(
+    @UploadedFiles() files: Express.Multer.File[],
+    @Body() body: any,
+  ) {
+    const clothing = await this.clothingService.create(body);
+
+    const images: { url: string }[] = [];
+    for (const file of files) {
+      const path = `clothing/${clothing.id}`;
+      const imageUrl = await this.blobService.uploadFile(file, path);
+      const image = this.imageRepository.create({ url: imageUrl, clothing });
+      await this.imageRepository.save(image);
+      images.push({ url: imageUrl });
+    }
+
+    return {
+      ...clothing,
+      images,
     };
   }
 
