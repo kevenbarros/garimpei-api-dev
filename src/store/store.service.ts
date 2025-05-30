@@ -24,7 +24,7 @@ export class StoreService {
   async findOne(id: number): Promise<Store> {
     const store = await this.storeRepository.findOne({
       where: { id },
-      relations: ['seller', 'clothings'],
+      relations: ['seller', 'clothings', 'clothings.images'],
     });
     if (!store) {
       throw new Error(`Store with id ${id} not found`);

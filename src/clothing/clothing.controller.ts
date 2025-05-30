@@ -110,7 +110,7 @@ export class ClothingController {
   @UseInterceptors(FilesInterceptor('images', 10)) // até 10 imagens
   async createWithImages(
     @UploadedFiles() files: Express.Multer.File[],
-    @Body() body: any,
+    @Body() body: CreateClothingDto,
   ) {
     const clothing = await this.clothingService.create(body);
 
