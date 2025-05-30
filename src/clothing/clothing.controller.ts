@@ -19,6 +19,12 @@ import { Image } from '../image/image.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AuthGuard } from '@nestjs/passport';
+import { Request } from 'express';
+import {
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
+} from '@nestjs/common';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('clothing')
@@ -65,6 +71,38 @@ export class ClothingController {
     await this.imageRepository.save(image);
 
     return { imageUrl };
+  }
+
+  @Post('create-with-image')
+  @UseInterceptors(FileInterceptor('image'))
+  async createWithImage(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5MB
+          new FileTypeValidator({ fileType: /(jpg|jpeg|png)$/ }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+    @Body() body: any,
+  ) {
+    // Cria o produto
+    const clothing = await this.clothingService.create(body);
+
+    // Faz upload da imagem
+    const path = `clothing/${clothing.id}`;
+    const imageUrl = await this.blobService.uploadFile(file, path);
+
+    // Salva a imagem associada ao produto
+    const image = this.imageRepository.create({ url: imageUrl, clothing });
+    await this.imageRepository.save(image);
+
+    // Retorna o produto com a imagem
+    return {
+      ...clothing,
+      images: [{ url: imageUrl }],
+    };
   }
 
   @Put(':id')
