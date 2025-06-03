@@ -7,12 +7,14 @@ import {
   Param,
   Delete,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { StoreService } from './store.service';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { Store } from './store.entity';
 import { AuthGuard } from '@nestjs/passport';
+import { IRequestWithUser } from 'src/interfaces';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('stores')
@@ -25,7 +27,11 @@ export class StoreController {
   }
 
   @Get()
-  findAll() {
+  findAll(@Req() req: IRequestWithUser): Promise<Store[] | Store> {
+    console.log('Usuário autenticado:', req.user);
+    if (req.user.seller) {
+      return this.storeService.findOne(Number(req.user.userId));
+    }
     return this.storeService.findAll();
   }
 
