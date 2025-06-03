@@ -10,6 +10,7 @@ import {
   UploadedFile,
   UseGuards,
   UploadedFiles,
+  Req,
 } from '@nestjs/common';
 import { ClothingService } from './clothing.service';
 import { CreateClothingDto } from './dto/create-clothing.dto';
@@ -26,6 +27,7 @@ import {
   MaxFileSizeValidator,
   FileTypeValidator,
 } from '@nestjs/common';
+import { IRequestWithUser } from 'src/interfaces';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('clothing')
@@ -43,7 +45,10 @@ export class ClothingController {
   }
 
   @Get()
-  findAll() {
+  findAll(@Req() req: IRequestWithUser) {
+    if (req.user.seller) {
+      return this.clothingService.findAllPerUser(req.user.userId);
+    }
     return this.clothingService.findAll();
   }
 

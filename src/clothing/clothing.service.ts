@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Clothing } from './clothing.entity';
@@ -13,14 +17,36 @@ export class ClothingService {
   ) {}
 
   async create(createClotingDto: CreateClothingDto): Promise<Clothing> {
-    const clothing = this.clothingRepository.create(createClotingDto);
-    return this.clothingRepository.save(clothing);
+    try {
+      const clothing = this.clothingRepository.create(createClotingDto);
+      return await this.clothingRepository.save(clothing);
+    } catch (error: any) {
+      throw new BadRequestException(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        error?.message || 'Failed to create clothing',
+      );
+    }
   }
 
-  findAll(): Promise<Clothing[]> {
-    return this.clothingRepository.find({
+  async findAll(): Promise<Clothing[]> {
+    const clothings = await this.clothingRepository.find({
       relations: ['store', 'bids', 'bids.buyer', 'images'],
     });
+    if (!clothings || clothings.length === 0) {
+      throw new NotFoundException('No clothing found');
+    }
+    return clothings;
+  }
+
+  async findAllPerUser(id: number): Promise<Clothing[]> {
+    const clothings = await this.clothingRepository.find({
+      where: { id },
+      relations: ['store', 'bids', 'bids.buyer', 'images'],
+    });
+    if (!clothings || clothings.length === 0) {
+      throw new NotFoundException(`No clothing found for user with id ${id}`);
+    }
+    return clothings;
   }
 
   async findOne(id: number): Promise<Clothing> {
@@ -29,7 +55,7 @@ export class ClothingService {
       relations: ['store', 'bids', 'bids.buyer', 'images'],
     });
     if (!clothing) {
-      throw new Error(`Clothing with id ${id} not found`);
+      throw new NotFoundException(`Store with id ${id} not found`);
     }
     return clothing;
   }
