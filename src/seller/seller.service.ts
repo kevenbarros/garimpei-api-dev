@@ -5,15 +5,32 @@ import { Seller } from './seller.entity';
 import { CreateSellerDto } from './dto/create-seller.dto';
 import { UpdateSellerDto } from './dto/update-seller.dto';
 import * as bcrypt from 'bcrypt';
+import { Buyer } from 'src/buyer/buyer.entity';
 
 @Injectable()
 export class SellerService {
   constructor(
     @InjectRepository(Seller)
     private sellerRepository: Repository<Seller>,
+    @InjectRepository(Buyer)
+    private buyerRepository: Repository<Buyer>,
   ) {}
 
-  async create(createSellerDto: CreateSellerDto): Promise<Seller> {
+  async create(
+    createSellerDto: CreateSellerDto,
+  ): Promise<Seller | { message: string }> {
+    const buyer = await this.buyerRepository.findOne({
+      where: { email: createSellerDto.email },
+    });
+    if (buyer) {
+      return { message: 'Email já está em uso por um comprador.' };
+    }
+    const existingSeller = await this.sellerRepository.findOne({
+      where: { email: createSellerDto.email },
+    });
+    if (existingSeller) {
+      return { message: 'Email já está em uso por um vendedor.' };
+    }
     const hash = await bcrypt.hash(createSellerDto.password, 10);
     const seller = this.sellerRepository.create({
       ...createSellerDto,
@@ -22,8 +39,10 @@ export class SellerService {
     return this.sellerRepository.save(seller);
   }
 
-  findAll(): Promise<Seller[]> {
-    return this.sellerRepository.find({ relations: ['stores'] });
+  async findAll() {
+    const sellers = await this.sellerRepository.find({ relations: ['stores'] });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    return sellers.map(({ password, ...rest }) => rest);
   }
 
   async findOne(id: number): Promise<Seller> {
