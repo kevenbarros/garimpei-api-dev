@@ -7,6 +7,8 @@ import {
   Delete,
   Put,
   UseGuards,
+  Request,
+  Req,
 } from '@nestjs/common';
 import { BuyerService } from './buyer.service';
 import { CreateBuyerDto } from './dto/create-buyer.dto';
@@ -15,6 +17,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { LoginBuyerDto } from './dto/login-buyer.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { IAuthRequest } from 'src/interfaces';
 
 @Controller('buyer')
 export class BuyerController {
@@ -30,7 +33,8 @@ export class BuyerController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  findAll() {
+  findAll(@Req() req: IAuthRequest) {
+    console.log('Usuário autenticado:', req.user);
     return this.buyerService.findAll();
   }
 
