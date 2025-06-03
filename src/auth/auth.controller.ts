@@ -25,9 +25,9 @@ export class AuthController {
       return { message: 'Email ou senha inválidos' };
     }
     // Gere o JWT
-    const payload = { sub: user.id, email: user.email };
+    const payload = { sub: user.id, email: user.email, seller: user.seller };
     const token = this.jwtService.sign(payload);
-    const { ...result } = user;
+    const { password, ...result } = user;
     return {
       token,
       ...result,
