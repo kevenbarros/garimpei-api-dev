@@ -9,9 +9,7 @@ services:
       POSTGRES_PASSWORD: root
       POSTGRES_DB: garimpeidb
     ports:
-      - "6000:5432"
-#    volumes:
-#      - pgdata:/var/lib/postgresql/data
+      - "7000:5432"
     networks:
       - garimpei-api-net
 
