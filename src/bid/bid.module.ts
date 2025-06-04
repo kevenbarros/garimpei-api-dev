@@ -5,10 +5,11 @@ import { Buyer } from 'src/buyer/buyer.entity';
 import { Clothing } from 'src/clothing/clothing.entity';
 import { BidService } from './bid.service';
 import { BidController } from './bid.controller';
+import { BidSseService } from './bid-sse.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Bid, Buyer, Clothing])],
   controllers: [BidController],
-  providers: [BidService],
+  providers: [BidService, BidSseService],
 })
 export class BidModule {}
