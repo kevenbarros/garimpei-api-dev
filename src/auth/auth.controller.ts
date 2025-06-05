@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { LoginAuthDto } from './dto/login-auth.dto';
@@ -15,18 +15,19 @@ export class AuthController {
   async login(@Body() loginAuthDto: LoginAuthDto) {
     const user = await this.authService.findByEmail(loginAuthDto.email);
     if (!user) {
-      return { message: 'Email ou senha inválidos' };
+      throw new UnauthorizedException('Email ou senha inválidos');
     }
     const isPasswordValid = await bcrypt.compare(
       loginAuthDto.password,
       user.password,
     );
     if (!isPasswordValid) {
-      return { message: 'Email ou senha inválidos' };
+      throw new UnauthorizedException('Email ou senha inválidos');
     }
     // Gere o JWT
     const payload = { sub: user.id, email: user.email, seller: user.seller };
     const token = this.jwtService.sign(payload);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...result } = user;
     return {
       token,
