@@ -17,10 +17,16 @@ export class StoreService {
     return this.storeRepository.save(store);
   }
 
-  async findAll(): Promise<Store[]> {
-    const stores = await this.storeRepository.find({
-      relations: ['seller', 'clothings'],
-    });
+  async findAll(idSeller?: number): Promise<Store[]> {
+    const query = idSeller
+      ? {
+          where: { id: idSeller },
+          relations: ['seller', 'clothings'],
+        }
+      : {
+          relations: ['seller', 'clothings'],
+        };
+    const stores = await this.storeRepository.find(query);
     if (!stores || stores.length === 0) {
       throw new NotFoundException('No stores found');
     }
