@@ -22,8 +22,12 @@ export class StoreController {
   constructor(private readonly storeService: StoreService) {}
 
   @Post()
-  create(@Body() createStoreDto: CreateStoreDto): Promise<Store> {
-    return this.storeService.create(createStoreDto);
+  create(
+    @Req() req: IRequestWithUser,
+    @Body() createStoreDto: CreateStoreDto,
+  ): Promise<Store> {
+    const idSeller = req.user.userId;
+    return this.storeService.create(createStoreDto, Number(idSeller));
   }
 
   @Get()

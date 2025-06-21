@@ -12,24 +12,24 @@ export class StoreService {
     private storeRepository: Repository<Store>,
   ) {}
 
-  async create(createStoreDto: CreateStoreDto): Promise<Store> {
-    const store = this.storeRepository.create(createStoreDto);
+  async create(createStoreDto: CreateStoreDto, id: number): Promise<Store> {
+    const store = this.storeRepository.create({
+      ...createStoreDto,
+      seller: { id },
+    });
     return this.storeRepository.save(store);
   }
 
   async findAll(idSeller?: number): Promise<Store[]> {
     const query = idSeller
       ? {
-          where: { id: idSeller },
+          where: { seller: { id: idSeller } },
           relations: ['seller', 'clothings'],
         }
       : {
           relations: ['seller', 'clothings'],
         };
     const stores = await this.storeRepository.find(query);
-    if (!stores || stores.length === 0) {
-      throw new NotFoundException('No stores found');
-    }
     return stores;
   }
 
