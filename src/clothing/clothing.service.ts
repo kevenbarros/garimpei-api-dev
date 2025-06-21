@@ -32,9 +32,6 @@ export class ClothingService {
     const clothings = await this.clothingRepository.find({
       relations: ['store', 'bids', 'bids.buyer', 'images'],
     });
-    if (!clothings || clothings.length === 0) {
-      throw new NotFoundException('No clothing found');
-    }
     return clothings;
   }
 
@@ -43,9 +40,6 @@ export class ClothingService {
       where: { id },
       relations: ['store', 'bids', 'bids.buyer', 'images'],
     });
-    if (!clothings || clothings.length === 0) {
-      throw new NotFoundException(`No clothing found for user with id ${id}`);
-    }
     return clothings;
   }
 
