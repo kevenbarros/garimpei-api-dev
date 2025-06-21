@@ -8,12 +8,15 @@ import { Repository } from 'typeorm';
 import { Clothing } from './clothing.entity';
 import { CreateClothingDto } from './dto/create-clothing.dto';
 import { UpdateClothingDto } from './dto/update-clothing.dto';
+import { Store } from 'src/store/store.entity';
 
 @Injectable()
 export class ClothingService {
   constructor(
     @InjectRepository(Clothing)
     private clothingRepository: Repository<Clothing>,
+    @InjectRepository(Store)
+    private storeRepository: Repository<Store>,
   ) {}
 
   async create(createClotingDto: CreateClothingDto): Promise<Clothing> {
@@ -36,10 +39,16 @@ export class ClothingService {
   }
 
   async findAllPerUser(id: number): Promise<Clothing[]> {
-    const clothings = await this.clothingRepository.find({
-      where: { id },
-      relations: ['store', 'bids', 'bids.buyer', 'images'],
+    const stores = await this.storeRepository.find({
+      where: { seller: { id: id } },
+      relations: ['clothings'],
     });
+    console.log('stores', stores);
+    const clothings = stores.flatMap((store) => store.clothings);
+    // const clothings = await this.clothingRepository.find({
+    //   where: { id },
+    //   relations: ['store', 'bids', 'bids.buyer', 'images'],
+    // });
     return clothings;
   }
 
