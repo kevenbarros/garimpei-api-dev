@@ -23,11 +23,17 @@ export class Clothing {
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   initial_bid: number;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  initial_date: Date;
+  @Column({ type: 'date', nullable: true })
+  initial_date: string; // Apenas a data (YYYY-MM-DD)
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  end_date: Date;
+  @Column({ type: 'time', nullable: true })
+  initial_time: string; // Apenas a hora (HH:mm:ss)
+
+  @Column({ type: 'date', nullable: true })
+  end_date: string;
+
+  @Column({ type: 'time', nullable: true })
+  end_time: string;
 
   @Column({ default: '' })
   size: string;

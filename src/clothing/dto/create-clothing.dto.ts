@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import {
   IsArray,
-  IsDate,
+  IsDateString,
   IsNumber,
   IsOptional,
   IsString,
@@ -21,11 +21,17 @@ export class CreateClothingDto {
   @IsNumber()
   initial_bid: number;
 
-  @IsDate()
-  initial_date: Date;
+  @IsDateString()
+  initial_date: string; // Ex: '2025-06-22'
 
-  @IsDate()
-  end_date: Date;
+  @IsString()
+  initial_time: string; // Ex: '14:00:00'
+
+  @IsDateString()
+  end_date: string;
+
+  @IsString()
+  end_time: string;
 
   @IsString()
   size: string;

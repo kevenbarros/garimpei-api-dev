@@ -77,21 +77,35 @@ export class ClothingService {
     return clothing;
   }
 
+  // ...existing code...
+  // ...existing code...
   async getTimeRemaining(id: number) {
     const clothing = await this.clothingRepository.findOne({ where: { id } });
     if (!clothing) {
       throw new Error('Clothing not found');
     }
 
+    // Combina data e hora para criar objetos Date
+    const initialDateTime = new Date(
+      `${clothing.initial_date}T${clothing.initial_time}`,
+    );
+    const endDateTime = new Date(`${clothing.end_date}T${clothing.end_time}`);
     const now = new Date();
-    const timeRemaining = clothing.end_date.getTime() - now.getTime();
 
+    const timeRemaining = endDateTime.getTime() - now.getTime();
+    console.log('initial Date', initialDateTime);
+    console.log('final Date', endDateTime);
     return {
-      isActive: now >= clothing.initial_date && now <= clothing.end_date,
+      isActive:
+        now.getTime() >= initialDateTime.getTime() &&
+        now.getTime() <= endDateTime.getTime(),
       timeRemaining: timeRemaining > 0 ? timeRemaining : 0,
       end_date: clothing.end_date,
+      end_time: clothing.end_time,
     };
   }
+  // ...existing code...
+  // ...existing code...
 
   async update(id: number, dto: UpdateClothingDto): Promise<Clothing> {
     await this.clothingRepository.update(id, dto);
