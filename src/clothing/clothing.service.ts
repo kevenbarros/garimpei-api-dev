@@ -38,19 +38,33 @@ export class ClothingService {
     return clothings;
   }
 
-  async findAllPerUser(id: number): Promise<Clothing[]> {
-    const stores = await this.storeRepository.find({
-      where: { seller: { id: id } },
-      relations: ['clothings'],
+  async findAllPerUser(sellerId: number): Promise<Clothing[]> {
+    const clothings = await this.clothingRepository.find({
+      relations: ['store', 'bids', 'bids.buyer', 'images'],
+      where: {
+        store: {
+          seller: {
+            id: sellerId,
+          },
+        },
+      },
     });
-    console.log('stores', stores);
-    const clothings = stores.flatMap((store) => store.clothings);
-    // const clothings = await this.clothingRepository.find({
-    //   where: { id },
-    //   relations: ['store', 'bids', 'bids.buyer', 'images'],
-    // });
     return clothings;
   }
+
+  // async findAllPerUser(id: number): Promise<Clothing[]> {
+  //   const stores = await this.storeRepository.find({
+  //     where: { seller: { id: id } },
+  //     relations: ['clothings'],
+  //   });
+  //   console.log('stores', stores);
+  //   const clothings = stores.flatMap((store) => store.clothings);
+  //   // const clothings = await this.clothingRepository.find({
+  //   //   where: { id },
+  //   //   relations: ['store', 'bids', 'bids.buyer', 'images'],
+  //   // });
+  //   return clothings;
+  // }
 
   async findOne(id: number): Promise<Clothing> {
     const clothing = await this.clothingRepository.findOne({
