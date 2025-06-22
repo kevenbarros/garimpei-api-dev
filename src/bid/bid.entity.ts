@@ -7,11 +7,16 @@ export class Bid {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ default: 0 })
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   bid: number;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  date: Date;
+  // ...existing code...
+  @Column({ type: 'date', nullable: true })
+  date: string;
+
+  @Column({ type: 'time', nullable: true })
+  time: string;
+  // ...existing code...
 
   @ManyToOne(() => Buyer, (buyer) => buyer.bids, { onDelete: 'CASCADE' })
   buyer: Buyer;

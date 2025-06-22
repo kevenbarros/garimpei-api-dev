@@ -4,22 +4,64 @@ import { Repository } from 'typeorm';
 import { Bid } from './bid.entity';
 import { CreateBidDto } from './dto/create-bid.dto';
 import { UpdateBidDto } from './dto/update-bid.dto';
+import { Store } from 'src/store/store.entity';
 
 @Injectable()
 export class BidService {
   constructor(
     @InjectRepository(Bid)
     private bidRepository: Repository<Bid>,
+    @InjectRepository(Store)
+    private storeRepository: Repository<Store>,
   ) {}
 
-  async create(createBidDto: CreateBidDto): Promise<Bid> {
-    const bid = this.bidRepository.create(createBidDto);
-
+  async create(createBidDto: CreateBidDto, id: number): Promise<Bid> {
+    const [date, time] = createBidDto.datetime.split('T');
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { datetime, ...rest } = createBidDto; // Remove datetime
+    const bid = this.bidRepository.create({
+      ...rest,
+      date,
+      time,
+      buyer: { id: id },
+    });
     return this.bidRepository.save(bid);
   }
 
-  findAll() {
-    return this.bidRepository.find({ relations: ['buyer', 'clothing'] });
+  findAllUser(id: number) {
+    console.log('id is', id);
+    return this.bidRepository.find({
+      where: { buyer: { id } },
+      relations: ['buyer', 'clothing'],
+    });
+  }
+
+  async findAllSeller(id: number) {
+    // Busca todas as stores do seller
+    const stores = await this.storeRepository.find({
+      where: { seller: { id } },
+      relations: [
+        'clothings',
+        'clothings.bids',
+        'clothings.bids.buyer',
+        'clothings.bids.clothing',
+      ],
+    });
+
+    // Extrai todos os bids das clothings dessas stores
+    const bids = stores
+      .flatMap((store) => store.clothings)
+      .flatMap((clothing) => clothing.bids);
+
+    return bids;
+  }
+
+  findAllPerClothing(id: number) {
+    console.log("I'm clothing", id);
+    return this.bidRepository.find({
+      where: { clothing: { id } },
+      relations: ['buyer', 'clothing'],
+    });
   }
 
   findOne(id: number) {
