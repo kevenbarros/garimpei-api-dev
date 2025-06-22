@@ -16,11 +16,13 @@ export class BidService {
   ) {}
 
   async create(createBidDto: CreateBidDto, id: number): Promise<Bid> {
-    const [date, time] = createBidDto.datetime.split('T');
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { datetime, ...rest } = createBidDto; // Remove datetime
+    const now = new Date();
+    const isoString = now.toISOString(); // Ex: '2025-06-22T15:30:00.000Z'
+    const [date, timeWithMs] = isoString.split('T');
+    const time = timeWithMs.split('.')[0]; // '15:30:00'
+
     const bid = this.bidRepository.create({
-      ...rest,
+      ...createBidDto,
       date,
       time,
       buyer: { id: id },
