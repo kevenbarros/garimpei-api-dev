@@ -35,8 +35,6 @@ export class BidService {
       where: { id: Number(clothingId) },
     });
 
-    console.log('result is ', clothing);
-
     if (!clothing) {
       throw new NotFoundException('Clothing não encontrada.');
     }
