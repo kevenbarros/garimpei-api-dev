@@ -29,7 +29,6 @@ import {
 } from '@nestjs/common';
 import { IRequestWithUser } from 'src/interfaces';
 
-@UseGuards(AuthGuard('jwt'))
 @Controller('clothing')
 export class ClothingController {
   constructor(
@@ -39,6 +38,7 @@ export class ClothingController {
     private readonly imageRepository: Repository<Image>,
   ) {}
 
+  @UseGuards(AuthGuard('jwt'))
   @Post()
   create(@Body() dto: CreateClothingDto) {
     return this.clothingService.create(dto);
@@ -46,7 +46,7 @@ export class ClothingController {
 
   @Get()
   findAll(@Req() req: IRequestWithUser) {
-    if (req.user.seller) {
+    if (req?.user?.seller) {
       return this.clothingService.findAllPerUser(req.user.userId);
     }
     return this.clothingService.findAll();
@@ -62,6 +62,7 @@ export class ClothingController {
     return this.clothingService.getTimeRemaining(+id);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Post(':id/upload-image')
   @UseInterceptors(FileInterceptor('image'))
   async uploadImage(
@@ -79,6 +80,7 @@ export class ClothingController {
     return { imageUrl };
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Post('create-with-image')
   @UseInterceptors(FileInterceptor('image'))
   async createWithImage(
@@ -111,6 +113,7 @@ export class ClothingController {
     };
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Post('create-with-images')
   @UseInterceptors(FilesInterceptor('images', 10)) // até 10 imagens
   async createWithImages(
@@ -134,11 +137,13 @@ export class ClothingController {
     };
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Put(':id')
   update(@Param('id') id: string, @Body() dto: UpdateClothingDto) {
     return this.clothingService.update(+id, dto);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.clothingService.remove(+id);
