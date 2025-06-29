@@ -1,10 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Bid } from './bid.entity';
 import { CreateBidDto } from './dto/create-bid.dto';
 import { UpdateBidDto } from './dto/update-bid.dto';
 import { Store } from 'src/store/store.entity';
+import { Clothing } from 'src/clothing/clothing.entity';
 
 @Injectable()
 export class BidService {
@@ -13,13 +18,36 @@ export class BidService {
     private bidRepository: Repository<Bid>,
     @InjectRepository(Store)
     private storeRepository: Repository<Store>,
+    @InjectRepository(Clothing)
+    private clothingService: Repository<Clothing>,
   ) {}
 
   async create(createBidDto: CreateBidDto, id: number): Promise<Bid> {
+    console.log('dto is ', createBidDto.clothing);
     const now = new Date();
     const isoString = now.toISOString(); // Ex: '2025-06-22T15:30:00.000Z'
     const [date, timeWithMs] = isoString.split('T');
     const time = timeWithMs.split('.')[0]; // '15:30:00'
+
+    const clothingId = createBidDto.clothing;
+
+    const clothing = await this.clothingService.findOne({
+      where: { id: Number(clothingId) },
+    });
+
+    console.log('result is ', clothing);
+
+    if (!clothing) {
+      throw new NotFoundException('Clothing não encontrada.');
+    }
+    const deadlineString = `${clothing.end_date}T${clothing.end_time}`;
+    const deadline = new Date(deadlineString);
+
+    if (new Date() > deadline) {
+      throw new ForbiddenException(
+        'O prazo para dar lances nesta peça expirou.',
+      );
+    }
 
     const bid = this.bidRepository.create({
       ...createBidDto,
@@ -50,7 +78,6 @@ export class BidService {
       ],
     });
 
-    // Extrai todos os bids das clothings dessas stores
     const bids = stores
       .flatMap((store) => store.clothings)
       .flatMap((clothing) => clothing.bids);
