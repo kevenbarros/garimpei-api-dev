@@ -6,6 +6,7 @@ import { CreateSellerDto } from './dto/create-seller.dto';
 import { UpdateSellerDto } from './dto/update-seller.dto';
 import * as bcrypt from 'bcrypt';
 import { Buyer } from 'src/buyer/buyer.entity';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class SellerService {
@@ -14,11 +15,15 @@ export class SellerService {
     private sellerRepository: Repository<Seller>,
     @InjectRepository(Buyer)
     private buyerRepository: Repository<Buyer>,
+    private jwtService: JwtService,
   ) {}
 
   async create(
     createSellerDto: CreateSellerDto,
-  ): Promise<Seller | { message: string }> {
+  ): Promise<
+    | ({ token: string; seller: boolean } & Omit<Seller, 'password'>)
+    | { message: string }
+  > {
     const buyer = await this.buyerRepository.findOne({
       where: { email: createSellerDto.email },
     });
@@ -32,11 +37,20 @@ export class SellerService {
       return { message: 'Email já está em uso por um vendedor.' };
     }
     const hash = await bcrypt.hash(createSellerDto.password, 10);
-    const seller = this.sellerRepository.create({
+
+    const newSeller = this.sellerRepository.create({
       ...createSellerDto,
       password: hash,
     });
-    return this.sellerRepository.save(seller);
+
+    const seller = await this.sellerRepository.save(newSeller); // <-- await aqui!
+
+    const payload = { sub: seller.id, email: seller.email, seller: true };
+    const token = this.jwtService.sign(payload);
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...result } = seller;
+    return { token, seller: true, ...result };
   }
 
   async findAll() {
