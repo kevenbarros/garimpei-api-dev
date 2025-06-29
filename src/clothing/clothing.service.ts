@@ -31,11 +31,27 @@ export class ClothingService {
     }
   }
 
-  async findAll(): Promise<Clothing[]> {
-    const clothings = await this.clothingRepository.find({
-      relations: ['store', 'bids', 'bids.buyer', 'images'],
+  async findAll(): Promise<any[]> {
+    const now = new Date();
+    const nowISOString = now.toISOString().slice(0, 19).replace('T', ' '); // 'YYYY-MM-DD HH:mm:ss'
+    console.log('NOW:', nowISOString);
+
+    const clothings = await this.clothingRepository
+      .createQueryBuilder('clothing')
+      .leftJoinAndSelect('clothing.store', 'store')
+      .leftJoinAndSelect('clothing.bids', 'bids')
+      .leftJoinAndSelect('bids.buyer', 'buyer')
+      .leftJoinAndSelect('clothing.images', 'images')
+      .select(['clothing', 'store.name', 'bids', 'buyer', 'images'])
+      .getMany();
+
+    const filtered = clothings.filter((c) => {
+      if (!c.end_date || !c.end_time) return false;
+      const endDateTime = new Date(`${c.end_date}T${c.end_time}`);
+      return endDateTime.getTime() > now.getTime();
     });
-    return clothings;
+
+    return filtered;
   }
 
   async findAllPerUser(sellerId: number): Promise<Clothing[]> {
@@ -77,8 +93,6 @@ export class ClothingService {
     return clothing;
   }
 
-  // ...existing code...
-  // ...existing code...
   async getTimeRemaining(id: number) {
     const clothing = await this.clothingRepository.findOne({ where: { id } });
     if (!clothing) {
