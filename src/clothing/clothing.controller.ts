@@ -11,6 +11,7 @@ import {
   UseGuards,
   UploadedFiles,
   Req,
+  Query,
 } from '@nestjs/common';
 import { ClothingService } from './clothing.service';
 import { CreateClothingDto } from './dto/create-clothing.dto';
@@ -45,11 +46,15 @@ export class ClothingController {
   }
 
   @Get()
-  findAll(@Req() req: IRequestWithUser) {
+  findAll(
+    @Req() req: IRequestWithUser,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+  ) {
     if (req?.user?.seller) {
       return this.clothingService.findAllPerUser(req.user.userId);
     }
-    return this.clothingService.findAll();
+    return this.clothingService.findAll(Number(page), Number(limit));
   }
 
   @Get(':id')

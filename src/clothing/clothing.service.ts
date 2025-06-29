@@ -31,7 +31,10 @@ export class ClothingService {
     }
   }
 
-  async findAll(): Promise<any[]> {
+  async findAll(
+    page = 1,
+    limit = 10,
+  ): Promise<{ items: Clothing[]; lastPage: boolean }> {
     const now = new Date();
     const nowISOString = now.toISOString().slice(0, 19).replace('T', ' '); // 'YYYY-MM-DD HH:mm:ss'
     console.log('NOW:', nowISOString);
@@ -51,7 +54,15 @@ export class ClothingService {
       return endDateTime.getTime() > now.getTime();
     });
 
-    return filtered;
+    const start = (page - 1) * limit;
+    const end = start + limit;
+    const items = filtered.slice(start, end);
+    const lastPage = end >= filtered.length;
+
+    return {
+      items,
+      lastPage,
+    };
   }
 
   async findAllPerUser(sellerId: number): Promise<Clothing[]> {
