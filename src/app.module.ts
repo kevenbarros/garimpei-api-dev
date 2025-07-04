@@ -22,7 +22,7 @@ import { AuthModule } from './auth/auth.module';
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
-      port: 6000,
+      port: 7000,
       username: 'postgres',
       password: 'root',
       database: 'garimpeidb',
