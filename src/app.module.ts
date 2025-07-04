@@ -9,6 +9,7 @@ import { Store } from './store/store.entity';
 import { Bid } from './bid/bid.entity';
 import { BuyerModule } from './buyer/buyer.module';
 import { SellerModule } from './seller/seller.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { StoreModule } from './store/store.module';
 import { BidModule } from './bid/bid.module';
 import { ClothingModule } from './clothing/clothing.module';
@@ -34,6 +35,7 @@ import { AuthModule } from './auth/auth.module';
     BidModule,
     ClothingModule,
     ImageModule,
+    DashboardModule,
     AuthModule,
   ],
   controllers: [AppController],
