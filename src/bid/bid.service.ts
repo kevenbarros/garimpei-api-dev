@@ -10,6 +10,7 @@ import { CreateBidDto } from './dto/create-bid.dto';
 import { UpdateBidDto } from './dto/update-bid.dto';
 import { Store } from 'src/store/store.entity';
 import { Clothing } from 'src/clothing/clothing.entity';
+import { BidSseService } from './bid-sse.service';
 
 @Injectable()
 export class BidService {
@@ -20,14 +21,14 @@ export class BidService {
     private storeRepository: Repository<Store>,
     @InjectRepository(Clothing)
     private clothingService: Repository<Clothing>,
+    private bidSseService: BidSseService,
   ) {}
 
   async create(createBidDto: CreateBidDto, id: number): Promise<Bid> {
-    console.log('dto is ', createBidDto.clothing);
     const now = new Date();
-    const isoString = now.toISOString(); // Ex: '2025-06-22T15:30:00.000Z'
+    const isoString = now.toISOString();
     const [date, timeWithMs] = isoString.split('T');
-    const time = timeWithMs.split('.')[0]; // '15:30:00'
+    const time = timeWithMs.split('.')[0];
 
     const clothingId = createBidDto.clothing;
 
@@ -53,7 +54,12 @@ export class BidService {
       time,
       buyer: { id: id },
     });
-    return this.bidRepository.save(bid);
+
+    const savedBid = await this.bidRepository.save(bid);
+
+    this.bidSseService.emitNewBid(Number(createBidDto.clothing), savedBid);
+
+    return savedBid;
   }
 
   findAllUser(id: number) {
