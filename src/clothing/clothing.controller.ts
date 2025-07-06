@@ -22,7 +22,6 @@ import { Image } from '../image/image.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AuthGuard } from '@nestjs/passport';
-import { Request } from 'express';
 import {
   ParseFilePipe,
   MaxFileSizeValidator,
@@ -55,6 +54,24 @@ export class ClothingController {
       return this.clothingService.findAllPerUser(req.user.userId);
     }
     return this.clothingService.findAll(Number(page), Number(limit));
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('finished-with-bids')
+  async getFinishedWithBids(@Req() req: IRequestWithUser) {
+    if (req?.user?.seller) {
+      return this.clothingService.findFinishedWithBidsBySeller(req.user.userId);
+    }
+    return this.clothingService.findFinishedByBuyer(req.user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('won-auctions')
+  async getWonAuctions(@Req() req: IRequestWithUser) {
+    if (req?.user?.seller) {
+      return this.clothingService.findFinishedWithBidsBySeller(req.user.userId);
+    }
+    return this.clothingService.findAuctionsWonByBuyer(req.user.userId);
   }
 
   @Get(':id')
