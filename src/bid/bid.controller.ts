@@ -52,6 +52,11 @@ export class BidController {
     return this.bidService.findAllUser(Number(user.userId));
   }
 
+  @Sse('stream/all')
+  streamBidsForClothingAll(): Observable<MessageEvent> {
+    return this.bidSseService.getBidStreamForClothingAll();
+  }
+
   @UseGuards(AuthGuard('jwt'))
   @Get('/clothing/:id')
   findAllPerClothing(@Param('id') id: string) {

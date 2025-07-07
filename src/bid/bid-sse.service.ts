@@ -12,6 +12,16 @@ interface BidEvent {
 export class BidSseService {
   private bidSubject = new Subject<BidEvent>();
 
+  getBidStreamForClothingAll(): Observable<MessageEvent> {
+    return this.bidSubject.asObservable().pipe(
+      map((event) => {
+        return {
+          data: JSON.stringify(event),
+          type: 'message',
+        } as MessageEvent;
+      }),
+    );
+  }
   getBidStreamForClothing(clothingId: number): Observable<MessageEvent> {
     return this.bidSubject.asObservable().pipe(
       filter((event) => {
