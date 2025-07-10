@@ -20,13 +20,8 @@ import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { BlobService } from 'src/blob/blob.service';
 import { Image } from '../image/image.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { AuthGuard } from '@nestjs/passport';
-import {
-  ParseFilePipe,
-  MaxFileSizeValidator,
-  FileTypeValidator,
-} from '@nestjs/common';
 import { IRequestWithUser } from 'src/interfaces';
 
 @Controller('clothing')
@@ -36,6 +31,7 @@ export class ClothingController {
     private readonly blobService: BlobService,
     @InjectRepository(Image)
     private readonly imageRepository: Repository<Image>,
+    private readonly dataSource: DataSource,
   ) {}
 
   @UseGuards(AuthGuard('jwt'))
@@ -102,61 +98,108 @@ export class ClothingController {
     return { imageUrl };
   }
 
-  @UseGuards(AuthGuard('jwt'))
-  @Post('create-with-image')
-  @UseInterceptors(FileInterceptor('image'))
-  async createWithImage(
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5MB
-          new FileTypeValidator({ fileType: /(jpg|jpeg|png)$/ }),
-        ],
-      }),
-    )
-    file: Express.Multer.File,
-    @Body() body: any,
-  ) {
-    // Cria o produto
-    const clothing = await this.clothingService.create(body);
+  // @UseGuards(AuthGuard('jwt'))
+  // @Post('create-with-image')
+  // @UseInterceptors(FileInterceptor('image'))
+  // async createWithImage(
+  //   @UploadedFile() file: Express.Multer.File,
+  //   @Body() body: any,
+  // ) {
+  //   const queryRunner = this.dataSource.createQueryRunner();
+  //   await queryRunner.connect();
+  //   await queryRunner.startTransaction();
 
-    // Faz upload da imagem
-    const path = `clothing/${clothing.id}`;
-    const imageUrl = await this.blobService.uploadFile(file, path);
+  //   try {
+  //     // Cria o produto dentro da transação
+  //     const clothingResult = await queryRunner.manager
+  //       .getRepository('Clothing')
+  //       .save(queryRunner.manager.getRepository('Clothing').create(body));
+  //     const clothing = Array.isArray(clothingResult)
+  //       ? clothingResult[0]
+  //       : clothingResult;
 
-    // Salva a imagem associada ao produto
-    const image = this.imageRepository.create({ url: imageUrl, clothing });
-    await this.imageRepository.save(image);
+  //     console.log('Clothing Result:', clothingResult);
 
-    // Retorna o produto com a imagem
-    return {
-      ...clothing,
-      images: [{ url: imageUrl }],
-    };
-  }
+  //     // Faz upload da imagem
+  //     const path = `clothing/${clothing.id}`;
+  //     const imageUrl = await this.blobService.uploadFile(file, path);
+
+  //     // Salva a imagem dentro da transação
+  //     const image = queryRunner.manager.getRepository('Image').create({
+  //       url: imageUrl,
+  //       clothing,
+  //     });
+  //     await queryRunner.manager.getRepository('Image').save(image);
+
+  //     // Confirma a transação
+  //     await queryRunner.commitTransaction();
+
+  //     return {
+  //       ...clothing,
+  //       images: [{ url: imageUrl }],
+  //     };
+  //   } catch (error) {
+  //     // Desfaz a transação em caso de erro
+  //     await queryRunner.rollbackTransaction();
+  //     throw error;
+  //   } finally {
+  //     // Libera o query runner
+  //     await queryRunner.release();
+  //   }
+  // }
 
   @UseGuards(AuthGuard('jwt'))
   @Post('create-with-images')
-  @UseInterceptors(FilesInterceptor('images', 10)) // até 10 imagens
+  @UseInterceptors(FilesInterceptor('images', 10))
   async createWithImages(
     @UploadedFiles() files: Express.Multer.File[],
     @Body() body: CreateClothingDto,
   ) {
-    const clothing = await this.clothingService.create(body);
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    const images: { url: string }[] = [];
-    for (const file of files) {
-      const path = `clothing/${clothing.id}`;
-      const imageUrl = await this.blobService.uploadFile(file, path);
-      const image = this.imageRepository.create({ url: imageUrl, clothing });
-      await this.imageRepository.save(image);
-      images.push({ url: imageUrl });
+    try {
+      const clothing = await queryRunner.manager
+        .getRepository('Clothing')
+        .save(queryRunner.manager.getRepository('Clothing').create(body));
+
+      console.log('Clothing Result:', clothing);
+
+      if (!clothing || !clothing.id) {
+        throw new Error('Falha ao criar o produto');
+      }
+
+      const images: { url: string }[] = [];
+
+      // Processa todas as imagens
+      for (const file of files) {
+        const path = `clothing/${clothing.id}`;
+        const imageUrl = await this.blobService.uploadFile(file, path);
+
+        const image = queryRunner.manager.getRepository('Image').create({
+          url: imageUrl,
+          clothing,
+        });
+        await queryRunner.manager.getRepository('Image').save(image);
+        images.push({ url: imageUrl });
+      }
+
+      // Confirma a transação
+      await queryRunner.commitTransaction();
+
+      return {
+        ...clothing,
+        images,
+      };
+    } catch (error) {
+      // Desfaz a transação em caso de erro
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      // Libera o query runner
+      await queryRunner.release();
     }
-
-    return {
-      ...clothing,
-      images,
-    };
   }
 
   @UseGuards(AuthGuard('jwt'))

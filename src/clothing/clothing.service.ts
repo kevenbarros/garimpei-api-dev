@@ -21,6 +21,24 @@ export class ClothingService {
 
   async create(createClotingDto: CreateClothingDto): Promise<Clothing> {
     try {
+      // verifica se a data e hora do termino sao maiores que a data e hora de inicio
+      if (!createClotingDto.end_date || !createClotingDto.end_time) {
+        throw new BadRequestException('End date and time must be provided');
+      }
+      if (!createClotingDto.initial_date || !createClotingDto.initial_time) {
+        throw new BadRequestException('Initial date and time must be provided');
+      }
+      const initialDateTime = new Date(
+        `${createClotingDto.initial_date}T${createClotingDto.initial_time}`,
+      );
+      const endDateTime = new Date(
+        `${createClotingDto.end_date}T${createClotingDto.end_time}`,
+      );
+      if (endDateTime.getTime() <= initialDateTime.getTime()) {
+        throw new BadRequestException(
+          'End date and time must be greater than initial date and time',
+        );
+      }
       const clothing = this.clothingRepository.create(createClotingDto);
       return await this.clothingRepository.save(clothing);
     } catch (error: any) {
