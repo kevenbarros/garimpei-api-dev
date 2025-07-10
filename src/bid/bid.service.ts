@@ -26,25 +26,46 @@ export class BidService {
 
   async create(createBidDto: CreateBidDto, id: number): Promise<Bid> {
     const now = new Date();
-    const isoString = now.toISOString();
-    const [date, timeWithMs] = isoString.split('T');
-    const time = timeWithMs.split('.')[0];
+
+    // Usa horário local em vez de UTC
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    const date = `${year}-${month}-${day}`;
+    const time = `${hours}:${minutes}:${seconds}`;
 
     const clothingId = createBidDto.clothing;
 
     const clothing = await this.clothingService.findOne({
       where: { id: Number(clothingId) },
+      relations: ['bids'],
     });
 
     if (!clothing) {
       throw new NotFoundException('Clothing não encontrada.');
     }
+
     const deadlineString = `${clothing.end_date}T${clothing.end_time}`;
     const deadline = new Date(deadlineString);
 
     if (new Date() > deadline) {
       throw new ForbiddenException(
         'O prazo para dar lances nesta peça expirou.',
+      );
+    }
+
+    const lastBid = await this.bidRepository.findOne({
+      where: { clothing: { id: Number(clothingId) } },
+      order: { id: 'DESC' },
+    });
+
+    if (lastBid && createBidDto.bid <= lastBid.bid) {
+      throw new ForbiddenException(
+        'O lance deve ser maior que o último lance dado!',
       );
     }
 

@@ -30,8 +30,8 @@ export class BidController {
   @Post()
   async create(@Req() req: IRequestWithUser, @Body() dto: CreateBidDto) {
     const user = req.user;
-    console.log('👤 User creating bid:', user);
-    console.log('📝 Bid data:', dto);
+    // console.log('👤 User creating bid:', user);
+    // console.log('📝 Bid data:', dto);
 
     if (user?.seller === false) {
       const bid = await this.bidService.create(dto, Number(user?.userId));
@@ -70,20 +70,6 @@ export class BidController {
   ): Observable<MessageEvent> {
     return this.bidSseService.getBidStreamForClothing(Number(clothingId));
   }
-
-  // @Get('test-sse/:clothingId')
-  // testSSE(@Param('clothingId') clothingId: string) {
-  //   console.log(`🧪 Teste manual SSE para clothing ${clothingId}`);
-
-  //   this.bidSseService.emitNewBid(Number(clothingId), {
-  //     id: 999,
-  //     bid: 100,
-  //     clothingId: Number(clothingId),
-  //     test: true,
-  //   });
-
-  //   return { message: 'SSE test event sent' };
-  // }
 
   @UseGuards(AuthGuard('jwt'))
   @Get(':id')
