@@ -2,7 +2,7 @@ version: "3.3"
 services:
   postgres:
     image: postgres:16
-    container_name: garimpei_postgres
+    container_name: garimpei_postgres_dev
     restart: always
     environment:
       POSTGRES_USER: postgres
@@ -11,18 +11,23 @@ services:
     ports:
       - "7000:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata_dev:/var/lib/postgresql/data
     networks:
       - garimpei-api-net
 
   api:
-    build: .
-    container_name: garimpei_api
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: garimpei_api_dev
     restart: always
     ports:
       - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USERNAME=postgres
@@ -35,7 +40,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4
-    container_name: garimpei_pgadmin
+    container_name: garimpei_pgadmin_dev
     restart: always
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
@@ -48,7 +53,7 @@ services:
       - garimpei-api-net
 
 volumes:
-  pgdata:
+  pgdata_dev:
 
 networks:
   garimpei-api-net:
